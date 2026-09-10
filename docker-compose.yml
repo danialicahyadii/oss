@@ -1,0 +1,96 @@
+services:
+  # =========================================================
+  # CACHE
+  # AWS: Amazon ElastiCache for Valkey
+  # =========================================================
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: oss-valkey
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_data:/data
+    command: valkey-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oss-network
+
+  # =========================================================
+  # MESSAGE BROKER
+  # AWS: Amazon MQ for RabbitMQ
+  # =========================================================
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: oss-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: oss
+      RABBITMQ_DEFAULT_PASS: oss
+      RABBITMQ_DEFAULT_VHOST: oss
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - oss-network
+
+  # =========================================================
+  # OBJECT STORAGE
+  # Local: MinIO
+  # AWS: Amazon S3
+  # =========================================================
+  minio:
+    image: minio/minio:latest
+    container_name: oss-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123456
+    ports:
+      - "9000:9000"
+      - "9002:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - oss-network
+
+  # =========================================================
+  # EMAIL DEVELOPMENT
+  # Local: Mailpit
+  # AWS: Amazon SES
+  # =========================================================
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: oss-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - oss-network
+
+networks:
+  oss-network:
+    driver: bridge
+
+volumes:
+  valkey_data:
+  rabbitmq_data:
+  minio_data:
