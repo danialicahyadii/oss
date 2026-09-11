@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	"oss.kftd.co.id/v2/main/shared/utils"
@@ -33,7 +32,6 @@ func (s *AuthService) Login(
 		ctx,
 		req.Username,
 	)
-	fmt.Println(user)
 
 	if err != nil {
 		return "", errors.New(

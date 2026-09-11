@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Role struct {
 	ID          uint64     `gorm:"column:id;primaryKey"`
@@ -10,7 +14,7 @@ type Role struct {
 	IsActive    bool       `gorm:"column:is_active"`
 	CreatedAt   time.Time  `gorm:"column:created_at"`
 	UpdatedAt   time.Time  `gorm:"column:updated_at"`
-	DeletedAt   *time.Time `gorm:"column:deleted_at"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at"`
 }
 
 func (Role) TableName() string {
