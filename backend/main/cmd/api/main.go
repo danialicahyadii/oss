@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"oss.kftd.co.id/v2/main/routes"
 	"oss.kftd.co.id/v2/main/shared/db"
+	"oss.kftd.co.id/v2/user-management/seeder"
 )
 
 func main() {
@@ -22,6 +23,13 @@ func main() {
 	}
 
 	log.Println("database connected")
+
+	// Run seeder
+	if err := seeder.SeedUserManagement(database); err != nil {
+		log.Fatal("user management seeder failed:", err)
+	}
+
+	log.Println("user management seeded")
 
 	router := gin.Default()
 

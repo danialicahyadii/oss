@@ -93,17 +93,19 @@ func Setup(
 			{
 				roles.Use(middleware.AuthMiddleware())
 
-				roles.GET("", roleHandler.GetRoles)
-				roles.GET("/:uuid", roleHandler.GetRole)
-				roles.POST("", roleHandler.CreateRole)
-				roles.PUT("/:uuid", roleHandler.UpdateRole)
-				roles.DELETE("/:uuid", roleHandler.DeleteRole)
+				roles.GET("", middleware.RequirePermission(permissionService, "role.read"), roleHandler.GetRoles)
+				roles.GET("/:uuid", middleware.RequirePermission(permissionService, "role.read"), roleHandler.GetRole)
+				roles.POST("", middleware.RequirePermission(permissionService, "role.create"), roleHandler.CreateRole)
+				roles.PUT("/:uuid", middleware.RequirePermission(permissionService, "role.update"), roleHandler.UpdateRole)
+				roles.DELETE("/:uuid", middleware.RequirePermission(permissionService, "role.delete"), roleHandler.DeleteRole)
 				roles.PUT(
 					"/:uuid/permissions",
+					middleware.RequirePermission(permissionService, "role.update"),
 					rolePermissionHandler.UpdateRolePermissions,
 				)
 				roles.GET(
 					"/:uuid/permissions",
+					middleware.RequirePermission(permissionService, "role.read"),
 					rolePermissionHandler.GetRolePermissions,
 				)
 			}
@@ -112,11 +114,11 @@ func Setup(
 			{
 				permissions.Use(middleware.AuthMiddleware())
 
-				permissions.GET("", permissionHandler.GetPermissions)
-				permissions.GET("/:uuid", permissionHandler.GetPermission)
-				permissions.POST("", permissionHandler.CreatePermission)
-				permissions.PUT("/:uuid", permissionHandler.UpdatePermission)
-				permissions.DELETE("/:uuid", permissionHandler.DeletePermission)
+				permissions.GET("", middleware.RequirePermission(permissionService, "permission.read"), permissionHandler.GetPermissions)
+				permissions.GET("/:uuid", middleware.RequirePermission(permissionService, "permission.read"), permissionHandler.GetPermission)
+				permissions.POST("", middleware.RequirePermission(permissionService, "permission.create"), permissionHandler.CreatePermission)
+				permissions.PUT("/:uuid", middleware.RequirePermission(permissionService, "permission.update"), permissionHandler.UpdatePermission)
+				permissions.DELETE("/:uuid", middleware.RequirePermission(permissionService, "permission.delete"), permissionHandler.DeletePermission)
 			}
 		}
 	}
